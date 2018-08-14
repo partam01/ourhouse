@@ -1,3 +1,5 @@
+<!-- uploading to GIT -->
+
 <?php 
 session_start();
 $servername = "localhost";
