@@ -1,4 +1,17 @@
 <?php include('_initialize.php') ?>
+<?php
+  $mytasks = find_my_tasks();
+  $pendingtasks = find_pending_tasks();
+  $openstasks = find_open_tasks();
+  $assignedtasks = find_assigned_tasks();
+  $compltasks = find_compl_tasks();
+?>
+<!-- if a task id is passed inthe url by clicking on a task name, edit task modal will pop up -->
+<?php
+  if (isset($_GET['id'])) {
+    echo display_task($_GET['id']);
+  }
+?>
 
 <!DOCTYPE html>
 
@@ -24,6 +37,14 @@
   </div>
 
 </div>
+
+<!-- this might display the edit task modal -->
+ <div id="EditTaskModal" class="modal">
+  <div class="modal-content">
+ <span id="close" class="close" onclick="CloseModal('EditTaskModal')">&times;</span>
+ <?php include('edit_task.php') ?>
+  </div>
+ </div>
   
   <section class="task_display" id="MyOTasks"> 
     <h2 class="section header">My Open Tasks</h2>  
@@ -36,12 +57,13 @@
         </tr>
      </thead>
       <tbody id="MyOTaskResults">
-        <tr>
-          <!-- this will be populated form the db -->
-          <td>Clean the bathroom</td>
-          <td>yesterday</td>
-          <td><input type="checkbox" name="name1" />&nbsp;</td>
-        </tr> 
+        <?php while($mytask = mysqli_fetch_assoc($mytasks)) { ?>
+                <tr>
+                  <td > <a href="tasks.php?id=<?php echo $mytask['id']; ?>"> <?php echo $mytask['name']; ?> </a>  </td>
+                  <td><?php echo $mytask['due_date']; ?></td> 
+                  <td><input type="checkbox" name="name1" />&nbsp;</td>
+                </tr>
+        <?php } ?>
       </tbody>
     </table>
   </section>
@@ -51,7 +73,6 @@
     <table class="section table">
       <thead class="section t-head">
         <tr>
-   <!-- this will be populated form the db -->
           <th></th>
           <th></th>
           <th>decline</th> 
@@ -59,12 +80,14 @@
         </tr>
      </thead>
       <tbody id="MyPTaskResults">
-        <tr>
-          <td width="230">Polina assigned you: Clean the bathroom</td>
-          <td>Sunday</td>
-          <td><input type="checkbox" name="name1" />&nbsp;</td>
-          <td><input type="checkbox" name="name1" />&nbsp;</td>
-        </tr> 
+        <?php while($pendingtask = mysqli_fetch_assoc($pendingtasks)) { ?>
+                <tr>
+                  <td > <a href="tasks.php?id=<?php echo $pendingtask['id']; ?>"> <?php echo $pendingtask['name']; ?> </a>  </td>
+                  <td><?php echo $pendingtask['due_date']; ?></td> 
+                  <td><input type="checkbox" name="name1" />&nbsp;</td>
+                  <td><input type="checkbox" name="name1" />&nbsp;</td>
+                </tr>
+        <?php } ?>
       </tbody>
     </table>
   </section>
@@ -80,14 +103,14 @@
         </tr>
      </thead>
       <tbody id="UnTaskResults">
-        <tr>
-   <!-- this will be populated form the db -->
-          <td>Clean the bathroom</td>
-          <td>today</td>
-<!-- need to populate names form the house to assign to -->
-          <td>(assign)</td>
-          <td><img src="https://ourhouse.000webhostapp.com/imgs/delete.png"></td>
-        </tr>
+        <?php while($openstask = mysqli_fetch_assoc($openstasks)) { ?>
+                <tr>
+                  <td > <a href="tasks.php?id=<?php echo $openstask['task_id']; ?>"> <?php echo $openstask['task_name']; ?> </a>  </td>
+                  <td><?php echo $openstask['due_date']; ?></td> 
+                  <td>(assign)</td>
+                  <td><img src="https://ourhouse.000webhostapp.com/imgs/delete.png"></td>
+                </tr>
+        <?php } ?>
       </tbody>
     </table>
   </section>
@@ -104,13 +127,14 @@
         </tr>
      </thead>
       <tbody id="ATaskResults">
-        <tr>
-   <!-- this will be populated form the db -->
-          <td>Clean the bathroom</td>
-          <td>today</td>
-          <td>Phil</td>
-          <td><img src="https://ourhouse.000webhostapp.com/imgs/delete.png"></td>
-        </tr>
+        <?php while($assignedtask = mysqli_fetch_assoc($assignedtasks)) { ?>
+                <tr>
+                  <td > <a href="tasks.php?id=<?php echo $assignedtask['task_id']; ?>"> <?php echo $assignedtask['task_name']; ?> </a>  </td>
+                  <td><?php echo $assignedtask['due_date']; ?></td> 
+                  <td><?php echo $assignedtask['assigned_to']; ?></td>
+                  <td><img src="https://ourhouse.000webhostapp.com/imgs/delete.png"></td>
+                </tr>
+        <?php } ?>
       </tbody>
     </table>
   </section>
@@ -126,11 +150,13 @@
         </tr>
      </thead>
       <tbody id="ATaskResults">
-        <tr>
-          <td>Clean the bathroom</td>
-          <td>Phil</td>
-          <td>(send reward)</td>
-        </tr>
+        <?php while($compltask = mysqli_fetch_assoc($compltasks)) { ?>
+                <tr>
+                  <td > <a href="tasks.php?id=<?php echo $compltask['task_id']; ?>"> <?php echo $compltask['task_name']; ?> </a>  </td>
+                  <td><?php echo $compltask['assigned_to']; ?></td>
+                  <td>(send reward)</td>
+                </tr>
+        <?php } ?>
       </tbody>
     </table>
   </section>  
