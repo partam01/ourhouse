@@ -8,7 +8,13 @@ function OpenModal(id) {
 
 // close the modal by model id passed with the button
 function CloseModal(id) {
-	document.getElementById(id).style.display = "none";
+	// var ErrorDiv = getElementsByClassName("error");
+	// if (ErrorDiv===null){
+		document.getElementById(id).style.display = "none";
+		window.location = "tasks.php";
+	// }else {
+	// 	document.getElementById(id).style.display = "block";
+	// }	
 }
 
 // display task frequency on create/edit task screen 
