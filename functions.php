@@ -1,5 +1,3 @@
-<!-- uploading to GIT -->
-
 <?php 
 session_start();
 $servername = "localhost";
@@ -23,6 +21,8 @@ if (!$db) {
 $username = "";
 $email    = "";
 $errors   = array(); 
+//todays date 
+//end of the month
 
 // call the register() function if register_btn is clicked
 if (isset($_POST['register_btn'])) {
@@ -199,7 +199,7 @@ function update_profile(){
 		}
 	}
 /////////////////////////////////////////////////////////
-// this will be the PHP functions for tasks//////////////
+// this will be the PHP functions for creating tasks//////////////
 /////////////////////////////////////////////////////////
 
 //find all users within the same house to display valid assign options
@@ -235,13 +235,6 @@ if (isset($_POST['create_task_btn'])) {
 function create_task() {
 global $db, $errors;
 
-// validate imput
-//task name mandatory 
-// due date is mandatory  
-// task name not more than ? char 
-// task descr no more tha char 
-//if name/due date already exists throw error or rather relay sb error! 
-
 //get form values
 
 	$recurrent   =  e($_POST['RecurrentTaskCB']);
@@ -255,60 +248,160 @@ global $db, $errors;
 	$status 	 = 'open';
 	$user_id     = $_SESSION['user']['id'];
 
+// validate imput
+//task name mandatory 
+if (empty($task_name)) { 
+		array_push($errors, "Task name is required"); 
+	}
+// task name not more than ? char 
+// task descr no more tha char 
+//if name/due date already exists throw error or rather relay sb error! 
+
 //if task is assigned, set assigend to, assigned by and status.
-if ($owner_name=='0'){
-	$owner_id = "NULL";
-	$assigned_by_id = "NULL";
-}else {
-	$owner_id = find_user_id($owner_name);
-	$assigned_by_id = $user_id;
-	if($owner_id == $assigned_by_id){
-		$status = 'assigned';
-	}else{
-		$status = 'pending';
-	}	
-}
-
-//check if the task is recurrent
-	if ($recurrent == '0') {
-		//if complete change status to done
-		if ($completed == '1') {
-			$status = 'done';
-		}
-		$query = "INSERT INTO  task_schedule(name, details, status, due_date, duration, assigned_to, assigned_by, creator) 
-					  VALUES('$task_name', '$descr', '$status', '$due_date', '$duration', $owner_id, $assigned_by_id, $user_id)";
-		echo $query;
-		mysqli_query($db, $query);
-		// header('location: tasks.php');
-		// exit;
-
-		// on page reload this is saving the previous query and saving tasks twice! can fix later, probably somethign with the form action or method
-	} else {
-//enter the details into the recurrent task table
-		$query = "INSERT INTO  recurrent_tasks(name, details, duration, frequency, default_owner, creator) 
-					  VALUES('$task_name', '$descr','$duration', '$frequency', $owner_id, $user_id)";
-		echo $query;
-		mysqli_query($db, $query);
-//enter details into task schedule for 2 years of tasks with intervals as frequency set
-		$task_date = new DateTime($due_date);
-		$interval = new DateInterval($frequency);
-		
-		$end_date = new DateTime($due_date);
-		$end_date->add(new DateInterval('P2Y'));
-
-		while($task_date<$end_date){
-
-			$task_date_str = $task_date->format('Y-m-d');
-
-			$query = "INSERT INTO  task_schedule(name, details, status, due_date, duration, assigned_to, assigned_by, creator) 
-						  VALUES('$task_name', '$descr', '$status', '$task_date_str', '$duration', $owner_id, $assigned_by_id, $user_id)";
-			mysqli_query($db, $query);
-
-			$task_date->add($interval);
-			// echo $task_date->format('Y-m-d H:i:s');
-		}
+if (count($errors) == 0) {
+	if ($owner_name=='0'){
+		$owner_id = "NULL";
+		$assigned_by_id = "NULL";
+	}else {
+		$owner_id = find_user_id($owner_name);
+		$assigned_by_id = $user_id;
+		if($owner_id == $assigned_by_id){
+			$status = 'assigned';
+		}else{
+			$status = 'pending';
+		}	
 	}
 
-	//IT works but due date is coming back as today even when not set, so need to set it to today always as its mandatory!
+	//check if the task is recurrent
+		if ($recurrent == '0') {
+			//if complete change status to done
+			if ($completed == '1') {
+				$status = 'done';
+			}
+			$query = "INSERT INTO  task_schedule(name, details, status, due_date, duration, assigned_to, assigned_by, creator) 
+						  VALUES('$task_name', '$descr', '$status', '$due_date', '$duration', $owner_id, $assigned_by_id, $user_id)";
+			echo $query;
+			mysqli_query($db, $query);
+			// header('location: tasks.php');
+			// exit;
+
+			// on page reload this is saving the previous query and saving tasks twice! can fix later, probably somethign with the form action or method
+		} else {
+	//enter the details into the recurrent task table
+			$query = "INSERT INTO  recurrent_tasks(name, details, duration, frequency, default_owner, creator) 
+						  VALUES('$task_name', '$descr','$duration', '$frequency', $owner_id, $user_id)";
+			echo $query;
+			mysqli_query($db, $query);
+	//enter details into task schedule for 2 years of tasks with intervals as frequency set
+			$task_date 	= new DateTime($due_date);
+			$interval 	= new DateInterval($frequency);
+			
+			$end_date 	= new DateTime($due_date);
+			$period 	= 'P2Y';
+			$end_date->add(new DateInterval($period));
+
+			while($task_date<$end_date){
+				$task_date_str = $task_date->format('Y-m-d');
+				
+				$query = "INSERT INTO  task_schedule(name, details, status, due_date, duration, assigned_to, assigned_by, creator) 
+							  VALUES('$task_name', '$descr', '$status', '$task_date_str', '$duration', $owner_id, $assigned_by_id, $user_id)";
+				mysqli_query($db, $query);
+
+				$task_date->add($interval);
+				// echo $task_date->format('Y-m-d H:i:s');
+			}
+		}
+	}
+}
+/////////////////////////////////////////////////////////
+// this will be the PHP functions for viewing tasks//////////////
+/////////////////////////////////////////////////////////
+
+$date_from = date('Y-m-d');
+$date_to = date('Y-m-d',strtotime("+1 Months"));
+
+// find all tasks this month assigned to the current user
+function find_my_tasks(){
+	global $db, $errors, $date_from, $date_to;
+
+	$user_id = $_SESSION['user']['id'];
+
+    $query = "SELECT * FROM task_schedule WHERE assigned_to=$user_id and status='assigned' and due_date between '$date_from' and '$date_to'";
+    $result = mysqli_query($db, $query);
+    return $result;
 }
 
+//find all tasks this month pending for the current user
+function find_pending_tasks(){
+	global $db, $errors, $date_from, $date_to;
+
+	$user_id = $_SESSION['user']['id'];
+    $query = "SELECT * FROM task_schedule WHERE assigned_to=$user_id and status='pending' and due_date between '$date_from' and '$date_to'";
+    $result = mysqli_query($db, $query);
+    return $result;
+}
+
+//find all tasks that are open and have been created for this house
+function find_open_tasks(){
+	global $db, $errors, $date_from, $date_to;
+
+	$user_house = $_SESSION['user']['house'];
+
+    $query = "SELECT T.id as task_id, T.name as task_name, T.due_date as due_date, U.name as user_name FROM task_schedule T, users U WHERE T.status='open' and T.creator =U.id  and U.house = '$user_house' and T.due_date between '$date_from' and '$date_to'";
+
+    // "SELECT * FROM task_schedule WHERE status='open' and creator in (SELECT id FROM users WHERE house='$user_house') and due_date between '$date_from' and '$date_to'";
+    $result = mysqli_query($db, $query);
+    return $result;
+
+}
+
+//find all tasks for this month for this house that are assigned to other users
+function find_assigned_tasks(){
+	global $db, $errors, $date_from, $date_to;
+
+	$user_id = $_SESSION['user']['id'];
+	$user_house = $_SESSION['user']['house'];
+
+    $query = "SELECT T.id as task_id, T.name as task_name, T.due_date as due_date, U.name as assigned_to FROM task_schedule T, users U WHERE T.status='assigned' and T.assigned_to =U.id and U.id !=$user_id  and U.house = '$user_house' and T.due_date between '$date_from' and '$date_to'";
+
+    // "SELECT * FROM task_schedule WHERE status='assigned' and assigned_to in (SELECT id FROM users WHERE house='$user_house' and id !=$user_id) and due_date between '$date_from' and '$date_to'";
+    $result = mysqli_query($db, $query);
+    return $result;
+
+}
+
+//find all completed tasks with due date of this and last months 
+function find_compl_tasks(){
+	global $db, $errors, $date_from, $date_to;
+
+	$date_from = date('Y-m-d',strtotime("-1 Months"));
+
+	$user_house = $_SESSION['user']['house'];
+
+    $query = "SELECT T.id as task_id, T.name as task_name, U.name as assigned_to FROM task_schedule T, users U WHERE T.status='done' and T.assigned_to =U.id and U.house = '$user_house' and T.due_date between '$date_from' and '$date_to'";
+    // in (SELECT id FROM users WHERE house='$user_house') and due_date between '$date_from' and '$date_to'";
+    $result = mysqli_query($db, $query);
+    return $result;
+
+}
+
+//maybe need past due date tasks? due date befor today and status not done
+
+//display a modal with task details 
+function display_task($id) {
+	global $db, $errors;
+
+// want to add user name to this query - need to test in db first
+	$query = "SELECT * FROM task_schedule  WHERE id = $id";
+
+    $result = mysqli_query($db, $query);
+    $task = mysqli_fetch_assoc($result);
+
+	$_SESSION['task'] = $task;
+
+	echo '<style type="text/css">
+        #EditTaskModal {
+            display: block;
+        }
+        </style>';
+}
