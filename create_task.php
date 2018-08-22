@@ -60,7 +60,7 @@
 
         <div class="input-group">
           <label><h2 id="DueDate">Due date:</h2></label>
-          <input type="date" name="due_date" value="0000-00-00">
+          <input type="date" name="due_date" id="due_date" value="<?php echo date('Y-m-d'); ?>">
         </div>
         
         <div id="RecurrentTaskDiv">
@@ -83,6 +83,7 @@
 
         <br>
         <div>
+          <!-- need to disable submit button until task name is provided/there is no error div -->
           <button type="submit" class="btn" name="create_task_btn">Save</button>
         </div>
        </form>

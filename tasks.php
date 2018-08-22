@@ -12,6 +12,33 @@
     echo display_task($_GET['id']);
   }
 ?>
+<!-- this might call a php function to update task to done when checkbox is set -->
+<?php
+  if (isset($_GET['doneid'])) {
+    echo set_task_to_done($_GET['doneid']);?>
+    <script type="text/javascript">
+    RefreshTasks();
+    </script>
+
+<?php } ?>
+<!-- this will call accept task update -->
+<?php
+  if (isset($_GET['acceptid'])) {
+    echo accept_task($_GET['acceptid']);?>
+    <script type="text/javascript">
+    RefreshTasks();
+    </script>
+
+<?php } ?>
+<!-- this calls decline task update -->
+<?php
+  if (isset($_GET['declineid'])) {
+    echo decline_task($_GET['declineid']);?>
+    <script type="text/javascript">
+    RefreshTasks();
+    </script>
+
+<?php } ?>
 
 <!DOCTYPE html>
 
@@ -61,7 +88,7 @@
                 <tr>
                   <td > <a href="tasks.php?id=<?php echo $mytask['id']; ?>"> <?php echo $mytask['name']; ?> </a>  </td>
                   <td><?php echo $mytask['due_date']; ?></td> 
-                  <td><input type="checkbox" name="name1" />&nbsp;</td>
+                  <td><input type="checkbox"  onclick="SetToDone('<?php echo $mytask['id']; ?>')" />&nbsp;</td>
                 </tr>
         <?php } ?>
       </tbody>
@@ -75,8 +102,8 @@
         <tr>
           <th></th>
           <th></th>
-          <th>decline</th> 
-          <th>accept</th>
+          <th>Decline</th> 
+          <th>Accept</th>
         </tr>
      </thead>
       <tbody id="MyPTaskResults">
@@ -84,8 +111,8 @@
                 <tr>
                   <td > <a href="tasks.php?id=<?php echo $pendingtask['id']; ?>"> <?php echo $pendingtask['name']; ?> </a>  </td>
                   <td><?php echo $pendingtask['due_date']; ?></td> 
-                  <td><input type="checkbox" name="name1" />&nbsp;</td>
-                  <td><input type="checkbox" name="name1" />&nbsp;</td>
+                  <td><input type="checkbox" onclick="DeclineTask('<?php echo $pendingtask['id']; ?>')" />&nbsp;</td>
+                  <td><input type="checkbox" onclick="AcceptTask('<?php echo $pendingtask['id']; ?>')" />&nbsp;</td>
                 </tr>
         <?php } ?>
       </tbody>
@@ -159,6 +186,7 @@
         <?php } ?>
       </tbody>
     </table>
+    <br>
   </section>  
 </body>
 </html>

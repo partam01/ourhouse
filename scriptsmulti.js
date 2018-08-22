@@ -59,3 +59,40 @@ function CompletedTasks() {
   }
 }
 
+
+//this doesn;t work for some reason 
+function CompletedTasksEdit() {
+  // Get the checkbox
+  var complCB = document.getElementById("CompletedTasksEditCB");
+  var dueDateText = document.getElementById("DueDateEdit");
+  var ownerText = document.getElementById("OwnerEdit");
+
+  // If the checkbox is checked, restrict recurrent task option and change due date label
+  if (complCB.checked === true){
+    dueDateText.innerText = 'Completed on:';
+    ownerText.innerText = 'Completed by:';
+  } else {
+    dueDateText.innerText = "Due date:";
+    ownerText.innerText = 'To be done by:';
+  }
+}
+
+function SetToDone($task_id){
+	//send the task id to php as doneid so that it can be updated
+    window.location ='tasks.php?doneid='+$task_id;
+}
+
+function AcceptTask($task_id){
+	//send the task id to php as doneid so that it can be updated
+    window.location ='tasks.php?acceptid='+$task_id;
+}
+
+function DeclineTask($task_id){
+	//send the task id to php as doneid so that it can be updated
+    window.location ='tasks.php?declineid='+$task_id;
+}
+
+
+function RefreshTasks(){
+	window.location ='tasks.php';
+}

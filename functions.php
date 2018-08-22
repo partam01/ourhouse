@@ -280,7 +280,7 @@ if (count($errors) == 0) {
 			}
 			$query = "INSERT INTO  task_schedule(name, details, status, due_date, duration, assigned_to, assigned_by, creator) 
 						  VALUES('$task_name', '$descr', '$status', '$due_date', '$duration', $owner_id, $assigned_by_id, $user_id)";
-			echo $query;
+			// echo $query;
 			mysqli_query($db, $query);
 			// header('location: tasks.php');
 			// exit;
@@ -290,7 +290,7 @@ if (count($errors) == 0) {
 	//enter the details into the recurrent task table
 			$query = "INSERT INTO  recurrent_tasks(name, details, duration, frequency, default_owner, creator) 
 						  VALUES('$task_name', '$descr','$duration', '$frequency', $owner_id, $user_id)";
-			echo $query;
+			// echo $query;
 			mysqli_query($db, $query);
 	//enter details into task schedule for 2 years of tasks with intervals as frequency set
 			$task_date 	= new DateTime($due_date);
@@ -362,7 +362,7 @@ function find_assigned_tasks(){
 	$user_id = $_SESSION['user']['id'];
 	$user_house = $_SESSION['user']['house'];
 
-    $query = "SELECT T.id as task_id, T.name as task_name, T.due_date as due_date, U.name as assigned_to FROM task_schedule T, users U WHERE T.status='assigned' and T.assigned_to =U.id and U.id !=$user_id  and U.house = '$user_house' and T.due_date between '$date_from' and '$date_to'";
+    $query = "SELECT T.id as task_id, T.name as task_name, T.due_date as due_date, U.name as assigned_to FROM task_schedule T, users U WHERE T.status in ('assigned','pending') and T.assigned_to =U.id and U.id !=$user_id  and U.house = '$user_house' and T.due_date between '$date_from' and '$date_to'";
 
     // "SELECT * FROM task_schedule WHERE status='assigned' and assigned_to in (SELECT id FROM users WHERE house='$user_house' and id !=$user_id) and due_date between '$date_from' and '$date_to'";
     $result = mysqli_query($db, $query);
@@ -391,7 +391,6 @@ function find_compl_tasks(){
 function display_task($id) {
 	global $db, $errors;
 
-// want to add user name to this query - need to test in db first
 	$query = "SELECT * FROM task_schedule  WHERE id = $id";
 
     $result = mysqli_query($db, $query);
@@ -404,4 +403,102 @@ function display_task($id) {
             display: block;
         }
         </style>';
+}
+
+
+/////////////////////////////////////////////////////////
+// this will be the PHP functions for editing and deleting tasks//////////////
+/////////////////////////////////////////////////////////
+
+//functions for the form submit to update tasks
+if (isset($_POST['edit_task_btn'])) {
+	edit_task();
+}
+
+function edit_task() {
+global $db, $errors;
+
+//get form values
+
+	$task_id 	 = $_SESSION['task']['id'];
+	$task_name   =  e($_POST['taskname_edit']);
+	$descr       =  e($_POST['task_desc_edit']);
+	$owner_name  =  e($_POST['Owner_edit']);
+	$duration    =  e($_POST['duration_edit']);
+	$completed   =  e($_POST['CompletedTasksEditCB']);
+	$due_date    =  e($_POST['due_date_edit']);
+	$status 	 = 'open';
+	$user_id     = $_SESSION['user']['id'];
+
+// validate imput
+//task name mandatory 
+if (empty($task_name)) { 
+		array_push($errors, "Task name is required"); 
+	}
+// task name not more than ? char 
+// task descr no more tha char 
+//if name/due date already exists throw error or rather relay sb error! 
+
+//if task is assigned, set assigend to, assigned by and status.
+if (count($errors) == 0) {
+	if ($owner_name=='0'){
+		$owner_id = "NULL";
+		$assigned_by_id = "NULL";
+	}else {
+		$owner_id = find_user_id($owner_name);
+		$assigned_by_id = $user_id;
+		if($owner_id == $assigned_by_id){
+			$status = 'assigned';
+		}else{
+			$status = 'pending';
+		}	
+	}
+
+	//if complete change status to done
+	if ($completed == '1') {
+		$status = 'done';
+	}
+	$query = "UPDATE  task_schedule SET name = '$task_name', details='$descr', status='$status', due_date='$due_date', duration='$duration', assigned_to=$owner_id, assigned_by=$assigned_by_id, creator=$user_id WHERE id = $task_id";
+	mysqli_query($db, $query);
+	
+	unset($_SESSION['task']);
+
+	}
+}
+
+//functions for the form submit to delete tasks
+if (isset($_POST['delete_task_btn'])) {
+	delete_task();
+}
+
+function delete_task() {
+global $db, $errors;
+
+	$task_id 	 = $_SESSION['task']['id'];
+
+	$query = "DELETE FROM task_schedule WHERE id = $task_id";
+	mysqli_query($db, $query);
+	
+	unset($_SESSION['task']);
+
+}
+
+//this will update the row of the tsk id sent by get doneid request to done
+function set_task_to_done($doneid) {
+global $db, $errors;
+	$query = "UPDATE task_schedule SET status='done' WHERE id = $doneid";
+	mysqli_query($db, $query);
+}
+
+function accept_task($acceptid) {
+global $db, $errors;
+	$query = "UPDATE task_schedule SET status='assigned' WHERE id = $acceptid";
+	mysqli_query($db, $query);
+}
+
+function decline_task($declineid) {
+global $db, $errors;
+// when you decline apending task, it will go to the person who originally assigned it to you but the status will stay pending so that they an see its been declined. might add a default string into description here. the new assigned person wil then see it in pending and either accept and change status to assigned or decline in which case nothing will happen. 
+	$query = "UPDATE task_schedule SET assigned_to = assigned_by  WHERE id = $declineid";
+	mysqli_query($db, $query);
 }
