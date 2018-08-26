@@ -502,3 +502,14 @@ global $db, $errors;
 	$query = "UPDATE task_schedule SET assigned_to = assigned_by  WHERE id = $declineid";
 	mysqli_query($db, $query);
 }
+
+function find_tasks(){
+	global $db, $errors;
+
+	$user_house = $_SESSION['user']['house'];
+
+	$query = "SELECT U.name as name, count(*) as value FROM users U, task_schedule T  WHERE T.status='done' and T.assigned_to =U.id and U.house = '$user_house' group by T.assigned_to";
+	$result = mysqli_query($db, $query);
+	$data = mysqli_fetch_all($result,MYSQLI_ASSOC);
+	return $data;
+}
