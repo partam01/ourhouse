@@ -12,41 +12,13 @@
     echo display_task($_GET['id']);
   }
 ?>
-<!-- this might call a php function to update task to done when checkbox is set -->
-<?php
-  if (isset($_GET['doneid'])) {
-    echo set_task_to_done($_GET['doneid']);?>
-    <script type="text/javascript">
-    RefreshTasks();
-    </script>
-
-<?php } ?>
-<!-- this will call accept task update -->
-<?php
-  if (isset($_GET['acceptid'])) {
-    echo accept_task($_GET['acceptid']);?>
-    <script type="text/javascript">
-    RefreshTasks();
-    </script>
-
-<?php } ?>
-<!-- this calls decline task update -->
-<?php
-  if (isset($_GET['declineid'])) {
-    echo decline_task($_GET['declineid']);?>
-    <script type="text/javascript">
-    RefreshTasks();
-    </script>
-
-<?php } ?>
 
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
-	<title>OurHouse Tasks</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+	<title>OurHouse Tasks</title> 
 </head>
 
 <body>
@@ -87,9 +59,13 @@
       <tbody id="MyOTaskResults">
         <?php while($mytask = mysqli_fetch_assoc($mytasks)) { ?>
                 <tr>
-                  <td > <a href="tasks.php?id=<?php echo $mytask['id']; ?>"> <?php echo $mytask['name']; ?> </a>  </td>
+                  <form method="post" action="tasks.php">
+                    <td style="hidden_column" name="id_value" value ="<?php echo $mytask['id']; ?>" ></td>
+                    <td > <a href="tasks.php?id=<?php echo $mytask['id']; ?>"> <?php echo $mytask['name']; ?> </a>  </td>
                   <td><?php echo $mytask['due_date']; ?></td> 
-                  <td><input type="checkbox"  onclick="SetToDone('<?php echo $mytask['id']; ?>')" />&nbsp;</td>
+                  <td><input type="checkbox" name="CB_to_done" value="1" />&nbsp;</td>
+                  <td><button type="submit" class="btn" name="set_to_done">update</button></td>
+                  </form>
                 </tr>
         <?php } ?>
       </tbody>
@@ -103,8 +79,8 @@
         <tr>
           <th></th>
           <th></th>
-          <th>Decline</th> 
-          <th>Accept</th>
+          <th>decline</th> 
+          <th>accept</th>
         </tr>
      </thead>
       <tbody id="MyPTaskResults">
@@ -112,8 +88,8 @@
                 <tr>
                   <td > <a href="tasks.php?id=<?php echo $pendingtask['id']; ?>"> <?php echo $pendingtask['name']; ?> </a>  </td>
                   <td><?php echo $pendingtask['due_date']; ?></td> 
-                  <td><input type="checkbox" onclick="DeclineTask('<?php echo $pendingtask['id']; ?>')" />&nbsp;</td>
-                  <td><input type="checkbox" onclick="AcceptTask('<?php echo $pendingtask['id']; ?>')" />&nbsp;</td>
+                  <td><input type="checkbox" name="name1" />&nbsp;</td>
+                  <td><input type="checkbox" name="name1" />&nbsp;</td>
                 </tr>
         <?php } ?>
       </tbody>
@@ -182,13 +158,7 @@
                 <tr>
                   <td > <a href="tasks.php?id=<?php echo $compltask['task_id']; ?>"> <?php echo $compltask['task_name']; ?> </a>  </td>
                   <td><?php echo $compltask['assigned_to']; ?></td>
-                  <td>
-                    <span class="fa fa-star checked"></span>
-                    <span class="fa fa-star checked"></span>
-                    <span class="fa fa-star checked"></span>
-                    <span class="fa fa-star"></span>
-                    <span class="fa fa-star"></span>
-                  </td>
+                  <td>(send reward)</td>
                 </tr>
         <?php } ?>
       </tbody>

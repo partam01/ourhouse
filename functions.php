@@ -405,6 +405,97 @@ function display_task($id) {
         </style>';
 }
 
+//this populated the graph on the dashboard
+function find_tasks(){
+	global $db, $errors;
+
+	$user_house = $_SESSION['user']['house'];
+
+	$query = "SELECT U.name as name, count(*) as value FROM users U, task_schedule T  WHERE T.status='done' and T.assigned_to =U.id and U.house = '$user_house' group by T.assigned_to";
+	$result = mysqli_query($db, $query);
+	$data = mysqli_fetch_all($result,MYSQLI_ASSOC);
+	return $data;
+}
+
+//this gets tasks for the historical task report
+ function get_tasks(){
+ 	global $db, $errors;
+
+	$task_name   	=  e($_POST['taskname_search']);
+	$owner_id  		=  e($_POST['owner_search']);
+	$duration    	=  e($_POST['duration_search']);	
+	$status 	 	=  e($_POST['status_search']);
+	$due_date_from  =  e($_POST['Date_from_search']);
+	$due_date_to   	=  e($_POST['Date_to_search']);
+	$user_house 	= $_SESSION['user']['house'];
+
+//following are 12 possible combinations for values of Owner(0= any owner, n= not assigned), duration (0=any, 1=set) and status (0=any, 1=set). due date is always checked and if task name ispassed as null, any task name will be picked up. 
+	if ($owner_id == "any"){
+		if ($duration == "any"){
+			if ($status == "any"){
+				//o=0 d=0 s=0
+				$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+			}else{
+				//o=0 d=0 s=1
+				$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.status='$status' and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+			}
+		}else{
+			if ($status == "any"){
+				//o=0 d=1 s=0
+				$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.duration= '$duration' and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+			}else{
+				//o=0 d=1 s=1
+				$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.duration= '$duration' and T.status='$status' and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+			}
+		}
+	}else{
+		if ($owner_id == '0'){
+			if ($duration == "any"){
+				if ($status == "any"){
+					//o=n d=0 s=0
+					$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to is null and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+				}else{
+					//o=n d=0 s=1
+					$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to is null and T.status='$status' and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+				}
+			}else{
+				if ($status == "any"){
+					//o=n d=1 s=0
+					$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.duration= '$duration' and T.assigned_to is null and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+				}else{
+					//o=n d=1 s=1
+					$query = "SELECT T.name as task_name, T.assigned_to as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to is null and T.duration= '$duration' and T.status='$status' and T.due_date between '$due_date_from' and '$due_date_to' and T.creator =U.id  and U.house = '$user_house' ";
+				}				
+			}
+		}else{
+			if ($duration == "any"){
+				if ($status == "any"){
+					//o=1 d=0 s=0
+					$query = "SELECT T.name as task_name, U.name as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to = $owner_id and T.due_date between '$due_date_from' and '$due_date_to' and T.assigned_to =U.id ";
+
+				}else{
+					//o=1 d=0 s=1
+					$query = "SELECT T.name as task_name, U.name as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to = $owner_id and T.status='$status' and T.due_date between '$due_date_from' and '$due_date_to' and T.assigned_to =U.id ";
+				}
+			}else{
+				if ($status == "any"){
+					//o=1 d=1 s=0
+					$query = "SELECT T.name as task_name, U.name as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to = $owner_id and T.duration= '$duration' and T.due_date between '$due_date_from' and '$due_date_to' and T.assigned_to =U.id ";
+				}else{
+					//o=1 d=1 s=1
+					$query = "SELECT T.name as task_name, U.name as owner, T.duration as duration, T.status as status, T.due_date as due_date FROM task_schedule T, users U WHERE T.name like '%$task_name%' and T.assigned_to = $owner_id and T.duration= '$duration' and T.status='$status' and T.due_date between '$due_date_from' and '$due_date_to' and T.assigned_to =U.id ";
+				}				
+			}
+		}	
+	}
+
+	$result = mysqli_query($db, $query);
+//add if count results =0 some error message else below
+ 	return $result;
+        
+ }
+
+
 
 /////////////////////////////////////////////////////////
 // this will be the PHP functions for editing and deleting tasks//////////////
@@ -503,13 +594,3 @@ global $db, $errors;
 	mysqli_query($db, $query);
 }
 
-function find_tasks(){
-	global $db, $errors;
-
-	$user_house = $_SESSION['user']['house'];
-
-	$query = "SELECT U.name as name, count(*) as value FROM users U, task_schedule T  WHERE T.status='done' and T.assigned_to =U.id and U.house = '$user_house' group by T.assigned_to";
-	$result = mysqli_query($db, $query);
-	$data = mysqli_fetch_all($result,MYSQLI_ASSOC);
-	return $data;
-}

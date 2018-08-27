@@ -58,7 +58,7 @@
             <option value="01:00:00">1 hour</option>
             <option value="02:00:00">2 hours</option>
             <option value="03:00:00">3 hours</option>
-            <option value="03:00:00">all your life</option>
+            <option value="24:00:00">1 day</option>
           </select>
         </div>
         <div>

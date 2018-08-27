@@ -32,7 +32,7 @@
           <label><h2 id="Owner">To be done by:</h2></label>
           
           <select name="Owner">
-            <option value = "0" selected="selected" >Don't know yet</option>
+            <option value = "21" selected="selected" >Don't know yet</option>
     <!-- populate options with users from same house -->
             <?php while($user = mysqli_fetch_assoc($users)) { ?>
                 <option value="<?php echo $user['name']; ?>"><?php echo $user['name']; ?></option>
@@ -49,7 +49,7 @@
             <option value="01:00:00">1 hour</option>
             <option value="02:00:00">2 hours</option>
             <option value="03:00:00">3 hours</option>
-            <option value="03:00:00">all your life</option>
+            <option value="24:00:00">1 day</option>
           </select>
         </div>
         <div id="DoneTaskDiv">

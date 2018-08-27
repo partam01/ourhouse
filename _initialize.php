@@ -18,6 +18,7 @@
 	  <nav id="MainMenu" class="Menu">
 	     <a href="index.php" class="menu_btn">Home</a>
 	     <a href="tasks.php" class="menu_btn">Tasks</a>
+	     <a href="task_report.php" class="menu_btn">Task report</a>
 	     <a href="#" class="menu_btn">Messages</a>
 	     <a href="#" class="menu_btn">Events</a>
 	     <a href="profile.php" class="menu_btn">Edit Profile</a>

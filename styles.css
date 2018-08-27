@@ -168,3 +168,7 @@ form, .content {
   font: 10px sans-serif;
   text-anchor: end;
 }
+
+.checked {
+    color: orange;
+}
